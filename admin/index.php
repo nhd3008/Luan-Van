@@ -15,7 +15,7 @@ require_once __DIR__ . '/../database/db_connect.php';
     <header>
         <h2>📊 Bảng điều khiển Admin</h2>
         <nav>
-            <a href="dashboard.php">🏠 Trang chủ Admin</a>
+            <a href="index.php">🏠 Trang chủ Admin</a>
             <a href="manage_products.php">📦 Quản lý Sản phẩm</a>
             <a href="manage_orders.php">📜 Quản lý Đơn hàng</a>
             <a href="manage_users.php">👤 Quản lý Người dùng</a>

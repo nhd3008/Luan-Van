@@ -15,36 +15,46 @@ $result = $conn->query($sql);
 </head>
 <body class="container mt-4">
 
-<h2 class="mb-4">Danh sách sản phẩm</h2>
-<table class="table table-bordered">
-    <tr class="table-primary">
-        <th>ID</th>
-        <th>Tên sản phẩm</th>
-        <th>Giá</th>
-        <th>Mô tả</th>
-        <th>Ảnh</th>
-        <th>Hành động</th>
-    </tr>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Danh sách sản phẩm</h2>
+    <div>
+    <a href="../admin/manage_products.php" class="btn btn-secondary me-2">🔙 Quản lý sản phẩm</a>
+    <a href="add_product.php" class="btn btn-success">➕ Thêm sản phẩm</a>
+    </div>
+</div>
 
+<table class="table table-bordered table-hover">
+    <thead class="table-primary">
+        <tr>
+            <th>ID</th>
+            <th>Tên sản phẩm</th>
+            <th>Giá</th>
+            <th>Mô tả</th>
+            <th>Ảnh</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
     <?php while ($row = $result->fetch_assoc()): ?>
-    <tr>
-        <td><?php echo $row['product_id']; ?></td>
-        <td><?php echo htmlspecialchars($row['name']); ?></td>
-        <td><?php echo number_format($row['price'], 0, ',', '.') . ' VND'; ?></td>
-        <td><?php echo htmlspecialchars($row['description']); ?></td>
-        <td>
-            <?php if (!empty($row['image_url'])): ?>
-                <img src="../<?php echo $row['image_url']; ?>" width="100">
-            <?php else: ?>
-                <span class="text-muted">Không có ảnh</span>
-            <?php endif; ?>
-        </td>
-        <td>
-            <a href="edit_product.php?id=<?php echo $row['product_id']; ?>" class="btn btn-warning btn-sm">Sửa</a>
-            <a href="delete_product.php?id=<?php echo $row['product_id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc muốn xóa?');">Xóa</a>
-        </td>
-    </tr>
+        <tr>
+            <td><?php echo $row['product_id']; ?></td>
+            <td><?php echo htmlspecialchars($row['name']); ?></td>
+            <td><?php echo number_format($row['price'], 0, ',', '.') . ' VND'; ?></td>
+            <td><?php echo htmlspecialchars($row['description']); ?></td>
+            <td>
+                <?php if (!empty($row['image_url'])): ?>
+                    <img src="../<?php echo $row['image_url']; ?>" width="100">
+                <?php else: ?>
+                    <span class="text-muted">Không có ảnh</span>
+                <?php endif; ?>
+            </td>
+            <td>
+                <a href="edit_product.php?id=<?php echo $row['product_id']; ?>" class="btn btn-warning btn-sm">Sửa</a>
+                <a href="delete_product.php?id=<?php echo $row['product_id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc muốn xóa?');">Xóa</a>
+            </td>
+        </tr>
     <?php endwhile; ?>
+    </tbody>
 </table>
 
 </body>

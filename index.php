@@ -46,8 +46,14 @@ $categories = [
 </head>
 <body>
 <?php include 'includes/header.php'; ?>
+<div class="banner mb-4">
+    <h1>Trái Cây Tươi Ngon - Tốt Cho Sức Khỏe 🍓🍍🥭</h1>
+    <p>Chào mừng bạn đến với Fruit For Health – nơi bạn tìm thấy những loại trái cây tốt nhất cho cơ thể.</p>
+    <a href="products.php" class="btn btn-light">Khám phá ngay</a>
+</div>
 
-<div class="container mt-4">
+<div class="container mt-4 container-product-list">
+
     <form method="GET" action="index.php" class="d-flex search-box">
         <input class="form-control me-2" type="search" name="search" placeholder="Tìm sản phẩm..." value="<?php echo htmlspecialchars($search); ?>">
         <button class="btn btn-outline-success" type="submit">Tìm kiếm</button>

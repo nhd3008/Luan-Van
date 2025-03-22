@@ -7,11 +7,20 @@ if (!isset($_SESSION['user_id'])) {
     die("<p class='text-center text-danger'>Bạn cần <a href='auth/login.php'>đăng nhập</a> để thêm sản phẩm vào giỏ hàng.</p>");
 }
 
+
+
 $user_id = $_SESSION['user_id'];
 
 // Xử lý thêm sản phẩm vào giỏ hàng
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
+
+    // Kiểm tra nếu là admin thì không cho thêm
+    if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
+        die("<p class='text-center text-danger'>Tài khoản admin không cần thêm vào giỏ hàng. Bạn không cần mua vào kho mà lấy. <a href='index.php'>Quay lại trang chủ</a></p>");
+    }
+
     $product_id = $_POST['product_id'];
+
 
     // Kiểm tra xem sản phẩm đã có trong giỏ hàng của user chưa
     $stmt = $conn->prepare("SELECT quantity FROM cart WHERE user_id = ? AND product_id = ?");

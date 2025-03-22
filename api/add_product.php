@@ -8,12 +8,27 @@ $categories = [
     "Hỗ trợ giảm cân",
     "Làm đẹp da"
 ];
+// Hàm sinh mã sản phẩm 6 chữ số không trùng
+function generateUniqueProductID($conn) {
+    do {
+        $product_id = rand(100000, 999999);
+        $stmt = $conn->prepare("SELECT product_id FROM products WHERE product_id = ?");
+        $stmt->bind_param("i", $product_id);
+        $stmt->execute();
+        $stmt->store_result();
+    } while ($stmt->num_rows > 0);
+    $stmt->close();
+    return $product_id;
+}
+
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = trim($_POST['name']);
     $price = floatval($_POST['price']);
     $description = trim($_POST['description']);
     $category = trim($_POST['category']); // Lấy giá trị danh mục từ form
+    $product_id = generateUniqueProductID($conn);
+
 
     // Xử lý upload ảnh (nếu có)
     $image_url = "uploads/default.jpg"; // Giá trị mặc định nếu không có ảnh
@@ -47,8 +62,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Thêm sản phẩm vào database
-    $stmt = $conn->prepare("INSERT INTO products (name, price, description, category, image_url) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("sdsss", $name, $price, $description, $category, $image_url);
+    $stmt = $conn->prepare("INSERT INTO products (product_id, name, price, description, category, image_url) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("isdsss", $product_id, $name, $price, $description, $category, $image_url);    
 
     if ($stmt->execute()) {
         echo "<script>alert('Thêm sản phẩm thành công!'); window.location.href='list_product.php';</script>";

@@ -22,9 +22,9 @@
             <!-- Cột 3: Liên hệ & Mạng xã hội -->
             <div class="col-md-4">
                 <h5>Liên hệ</h5>
-                <p><i class="bi bi-envelope"></i> Email: support@fruitforhealth.com</p>
-                <p><i class="bi bi-phone"></i> Hotline: 0123 456 789</p>
-                <p><i class="bi bi-geo-alt"></i> Địa chỉ: 123 Đường Sức Khỏe, TP.HCM</p>
+                <p><i class="bi bi-envelope"></i> Email: nguyenhoangdonglm@hmail.com</p>
+                <p><i class="bi bi-phone"></i> Hotline: 0377296369</p>
+                <p><i class="bi bi-geo-alt"></i> Địa chỉ: 132 đường 3/2 Ninh Kiều Cần Thơ</p>
 
                 <!-- Mạng xã hội -->
                 <h5>Kết nối với chúng tôi</h5>
