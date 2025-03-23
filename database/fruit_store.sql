@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 20, 2025 at 06:49 PM
+-- Generation Time: Mar 23, 2025 at 04:09 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -34,14 +34,6 @@ CREATE TABLE `cart` (
   `quantity` int(11) DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `cart`
---
-
-INSERT INTO `cart` (`id`, `user_id`, `product_id`, `quantity`, `created_at`) VALUES
-(1, 4, 2, 2, '2025-03-20 10:31:01'),
-(2, 4, 3, 1, '2025-03-20 10:31:44');
 
 -- --------------------------------------------------------
 
@@ -89,9 +81,7 @@ CREATE TABLE `orders` (
 --
 
 INSERT INTO `orders` (`order_id`, `user_id`, `total_price`, `order_status`, `created_at`, `payment_method`) VALUES
-(2, 5, 12.00, 'pending', '2025-03-20 10:41:10', 'bank'),
-(3, 5, 15000.00, 'pending', '2025-03-20 10:45:08', 'bank'),
-(4, 5, 12.00, 'pending', '2025-03-20 10:51:13', 'cod');
+(5, 471586, 12000.00, 'pending', '2025-03-23 05:45:40', 'cod');
 
 -- --------------------------------------------------------
 
@@ -112,9 +102,7 @@ CREATE TABLE `order_items` (
 --
 
 INSERT INTO `order_items` (`order_item_id`, `order_id`, `product_id`, `quantity`, `price`) VALUES
-(1, 2, 2, 1, 12.00),
-(2, 3, 3, 1, 15000.00),
-(3, 4, 2, 1, 12.00);
+(4, 5, 125147, 1, 12000.00);
 
 -- --------------------------------------------------------
 
@@ -123,7 +111,7 @@ INSERT INTO `order_items` (`order_item_id`, `order_id`, `product_id`, `quantity`
 --
 
 CREATE TABLE `products` (
-  `product_id` int(11) NOT NULL,
+  `product_id` int(6) NOT NULL,
   `name` varchar(255) NOT NULL,
   `price` decimal(10,2) NOT NULL,
   `description` text DEFAULT NULL,
@@ -139,8 +127,16 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`product_id`, `name`, `price`, `description`, `category`, `discount`, `image_url`, `created_at`, `visibility`) VALUES
-(2, 'ádf', 12.00, 'ád', 'Tăng cường miễn dịch', 0.00, 'uploads/1742379816_táo.jpg', '2025-03-19 10:13:41', 'public'),
-(3, 'táo dòn', 15000.00, '11', 'Tăng cường miễn dịch', 0.00, 'uploads/1742379933_mau-den.jpg', '2025-03-19 10:25:33', 'public');
+(125147, 'Chuối Nam Mỹ', 12000.00, 'ngon', 'Tăng cường miễn dịch', 0.00, 'uploads/1742533468_1742531672_banana.png', '2025-03-21 04:42:09', 'public'),
+(216244, 'Đu đủ', 25000.00, 'chín mọng', 'Tăng cường miễn dịch', 0.00, 'uploads/1742632163_đu đủ.jpg', '2025-03-22 08:29:23', 'public'),
+(312786, 'Thanh Long', 25000.00, 'Ruột đỏ, Ruột trắng tuỳ loại', 'Làm đẹp da', 0.00, 'uploads/1742633082_thanh long.jpg', '2025-03-22 08:44:42', 'public'),
+(453384, 'sầu riêng', 150000.00, 'Đặc sản', 'Tốt cho tiêu hóa', 0.00, 'uploads/1742533396_sầu riêng.jpg', '2025-03-21 05:03:16', 'public'),
+(463458, 'cam ngọt', 18000.00, 'ngon lắm', 'Hỗ trợ giảm cân', 0.00, 'uploads/1742533525_cam.jpg', '2025-03-21 04:40:53', 'public'),
+(473170, 'Xoài cát', 15000.00, 'ngọt nhẹ', 'Hỗ trợ giảm cân', 0.00, 'uploads/1742633110_xoài.jpg', '2025-03-22 08:45:10', 'public'),
+(833347, 'Lựu đỏ', 50000.00, 'mọng nước', 'Tăng cường miễn dịch', 0.00, 'uploads/1742633005_lựu đỏ.jpg', '2025-03-22 08:43:25', 'public'),
+(836179, 'nho', 35000.00, 'nho ngọt', 'Tăng cường miễn dịch', 0.00, 'uploads/1742625624_nho.jpg', '2025-03-22 06:40:24', 'public'),
+(889487, 'Hồng giòn', 30000.00, 'xuất xứ Việt Nam', 'Làm đẹp da', 0.00, 'uploads/1742632938_hồng giòn.jpg', '2025-03-22 08:42:18', 'public'),
+(989849, 'táo', 60000.00, 'hơi ngon', 'Hỗ trợ giảm cân', 0.00, 'uploads/1742533534_táo.jpg', '2025-03-21 04:38:54', 'public');
 
 -- --------------------------------------------------------
 
@@ -186,8 +182,7 @@ CREATE TABLE `reviews` (
 --
 
 INSERT INTO `reviews` (`review_id`, `user_id`, `product_id`, `rating`, `comment`, `created_at`) VALUES
-(331, 5, 2, 5, 'ngon', '2025-03-20 11:31:33'),
-(332, 5, 2, 5, 'giòn', '2025-03-20 11:33:22');
+(333, 471586, 125147, 5, 'ngon', '2025-03-23 05:45:53');
 
 -- --------------------------------------------------------
 
@@ -214,7 +209,7 @@ INSERT INTO `settings` (`id`, `store_name`) VALUES
 --
 
 CREATE TABLE `users` (
-  `user_id` int(11) NOT NULL,
+  `user_id` int(6) NOT NULL,
   `username` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
@@ -232,8 +227,7 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`user_id`, `username`, `email`, `password`, `role`, `age`, `health_goal`, `flavor_preference`, `lifestyle`, `created_at`) VALUES
 (1, 'admin', 'admin@gmail.com', '$2a$10$fY2OCfcCmTcSIY8l83IGIuoz8JaAAUtz8.xnrJLyRtl09TJZh1Nb.', 'admin', NULL, NULL, NULL, NULL, '2025-03-19 09:12:21'),
-(4, 'đông', 'ab@gmail.com', '$2y$10$zaADDkFig8Re34mqhIv3CuDPQsypECGWpEiBqQE6TzfxehGiH51ca', 'user', NULL, NULL, NULL, NULL, '2025-03-20 09:49:07'),
-(5, 'khang', 'ai@gmail.com', '$2y$10$SXBUrSUwtpZ/1en4koXu9estIjRFig7ffKYuJ96P1OThBjqN8IZdS', 'user', NULL, NULL, NULL, NULL, '2025-03-20 10:32:57');
+(471586, 'đông', 'ai@gmail.com', '$2y$10$NQ57yzjLY.y.lT/jbfK3r..Ax1oAZ2QVt0T2cVI6PbwqEz4ZDwYBG', 'user', NULL, NULL, NULL, NULL, '2025-03-21 04:59:45');
 
 --
 -- Indexes for dumped tables
@@ -280,7 +274,8 @@ ALTER TABLE `order_items`
 -- Indexes for table `products`
 --
 ALTER TABLE `products`
-  ADD PRIMARY KEY (`product_id`);
+  ADD PRIMARY KEY (`product_id`),
+  ADD UNIQUE KEY `product_id` (`product_id`);
 
 --
 -- Indexes for table `product_health_goals`
@@ -316,7 +311,8 @@ ALTER TABLE `settings`
 ALTER TABLE `users`
   ADD PRIMARY KEY (`user_id`),
   ADD UNIQUE KEY `username` (`username`),
-  ADD UNIQUE KEY `email` (`email`);
+  ADD UNIQUE KEY `email` (`email`),
+  ADD UNIQUE KEY `user_id` (`user_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -326,7 +322,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `health_goals`
@@ -344,19 +340,13 @@ ALTER TABLE `nutrition_info`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `products`
---
-ALTER TABLE `products`
-  MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `quiz_results`
@@ -368,19 +358,13 @@ ALTER TABLE `quiz_results`
 -- AUTO_INCREMENT for table `reviews`
 --
 ALTER TABLE `reviews`
-  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=333;
+  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=334;
 
 --
 -- AUTO_INCREMENT for table `settings`
 --
 ALTER TABLE `settings`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `users`
---
-ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Constraints for dumped tables
