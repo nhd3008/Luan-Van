@@ -1,5 +1,4 @@
 <?php
-// quiz_result.php - Gợi ý trái cây theo kết quả quiz với tích hợp AI
 session_start();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -15,39 +14,41 @@ $time = $quiz['time'] ?? '';
 $allergy = $quiz['allergy'] ?? '';
 
 function get_ai_suggestion($goal, $taste, $time, $allergy) {
-    $api_key = ; // Thay bằng API key thật
+  $api_key = ""; // Thay bằng API key của bạn
 
-    $prompt = "Tôi muốn ăn trái cây để $goal.";
-    $prompt .= $taste ? " Tôi thích vị $taste." : '';
-    $prompt .= $time ? " Tôi thường ăn vào buổi $time." : '';
-    $prompt .= $allergy ? " Tôi bị dị ứng với $allergy." : '';
-    $prompt .= " Hãy gợi ý những loại trái cây phù hợp, bằng tiếng Việt, dưới dạng danh sách.";
+  $prompt = "Tôi muốn ăn trái cây để $goal.";
+  $prompt .= $taste ? " Tôi thích vị $taste." : '';
+  $prompt .= $time ? " Tôi thường ăn vào buổi $time." : '';
+  $prompt .= $allergy ? " Tôi bị dị ứng với $allergy." : '';
+  $prompt .= " Hãy gợi ý những loại trái cây phù hợp, bằng tiếng Việt, dưới dạng danh sách.";
 
-    $data = [
-        "model" => "gpt-3.5-turbo",
-        "messages" => [["role" => "user", "content" => $prompt]],
-        "temperature" => 0.7
-    ];
+  $data = [
+      'contents' => [[
+          'parts' => [[ 'text' => $prompt ]]
+      ]]
+  ];
 
-    $ch = curl_init('https://api.openai.com/v1/chat/completions');
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Content-Type: application/json',
-        'Authorization: Bearer ' . $api_key
-    ]);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-    $response = curl_exec($ch);
-    $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
+  $url = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=$api_key";
 
-    $result = json_decode($response, true);
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      'Content-Type: application/json'
+  ]);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+  $response = curl_exec($ch);
+  $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+  curl_close($ch);
 
-    if ($http_status !== 200 || !isset($result['choices'][0]['message']['content'])) {
-        return "❌ Lỗi API ($http_status): " . ($result['error']['message'] ?? 'Không rõ lỗi') . "\n\nPhản hồi từ server:\n" . $response;
-    }
+  $result = json_decode($response, true);
 
-    return $result['choices'][0]['message']['content'];
+  if ($http_status !== 200 || !isset($result['candidates'][0]['content']['parts'][0]['text'])) {
+      return "❌ Lỗi Gemini API ($http_status): " . ($result['error']['message'] ?? 'Không rõ lỗi') . "\n\n" . $response;
+  }
+
+  return $result['candidates'][0]['content']['parts'][0]['text'];
 }
+
 
 $suggestions = get_ai_suggestion($goal, $taste, $time, $allergy);
 ?>
