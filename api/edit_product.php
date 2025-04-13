@@ -7,7 +7,7 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 
 $id = $_GET['id'];
 
-// Danh sách danh mục tĩnh (giống add_product.php)
+// Danh sách danh mục tĩnh
 $categories = [
     "Tăng cường miễn dịch",
     "Tốt cho tiêu hóa",
@@ -29,9 +29,10 @@ $product = $result->fetch_assoc();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = trim($_POST['name']);
-    $price = floatval($_POST['price']);
+    $selling_price = floatval($_POST['selling_price']);
     $description = trim($_POST['description']);
     $category = trim($_POST['category']);
+    $unit = trim($_POST['unit']);
     $image_url = $product['image_url'];
 
     if (isset($_FILES["image"]) && $_FILES["image"]["error"] == 0) {
@@ -64,12 +65,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    $sql = "UPDATE products SET name = ?, price = ?, description = ?, image_url = ?, category = ? WHERE product_id = ?";
+    $sql = "UPDATE products SET name = ?, selling_price = ?, description = ?, image_url = ?, category = ?, unit = ? WHERE product_id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sdsssi", $name, $price, $description, $image_url, $category, $id);
+    $stmt->bind_param("sdssssi", $name, $selling_price, $description, $image_url, $category, $unit, $id);
 
     if ($stmt->execute()) {
-        echo "<script>alert('Cập nhật thành công!'); window.location.href='list_product.php';</script>";
+        echo "<script>alert('Cập nhật thành công!'); window.location.href='../admin/manage_products.php';</script>";
     } else {
         echo "Lỗi: " . $stmt->error;
     }
@@ -91,21 +92,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <h2 class="mb-4">Sửa Sản Phẩm</h2>
 <form action="" method="post" enctype="multipart/form-data">
-    <input type="hidden" name="id" value="<?php echo $product['product_id']; ?>">
+    <input type="hidden" name="id" value="<?= $product['product_id']; ?>">
 
     <div class="mb-3">
         <label for="name" class="form-label">Tên sản phẩm:</label>
-        <input type="text" id="name" name="name" class="form-control" value="<?php echo htmlspecialchars($product['name']); ?>" required>
+        <input type="text" id="name" name="name" class="form-control" value="<?= htmlspecialchars($product['name']); ?>" required>
     </div>
 
     <div class="mb-3">
-        <label for="price" class="form-label">Giá:</label>
-        <input type="number" id="price" name="price" class="form-control" value="<?php echo $product['price']; ?>" required>
+        <label for="selling_price" class="form-label">Giá:</label>
+        <input type="number" id="selling_price" name="selling_price" class="form-control" value="<?= $product['selling_price']; ?>" required>
     </div>
 
     <div class="mb-3">
         <label for="description" class="form-label">Mô tả:</label>
-        <textarea id="description" name="description" class="form-control"><?php echo htmlspecialchars($product['description']); ?></textarea>
+        <textarea id="description" name="description" class="form-control"><?= htmlspecialchars($product['description']); ?></textarea>
     </div>
 
     <div class="mb-3">
@@ -120,9 +121,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 
     <div class="mb-3">
-        <label for="image" class="form-label">Ảnh hiện tại:</label><br>
+        <label for="unit" class="form-label">Đơn vị bán:</label>
+        <select id="unit" name="unit" class="form-select" required>
+            <option value="kg" <?= ($product['unit'] == 'kg') ? 'selected' : '' ?>>Kg</option>
+            <option value="trái" <?= ($product['unit'] == 'trái') ? 'selected' : '' ?>>Trái</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Ảnh hiện tại:</label><br>
         <?php if (!empty($product['image_url'])): ?>
-            <img src="../<?php echo $product['image_url']; ?>" width="150"><br>
+            <img src="../<?= $product['image_url']; ?>" width="150"><br>
         <?php else: ?>
             <span class="text-muted">Không có ảnh</span><br>
         <?php endif; ?>

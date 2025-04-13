@@ -187,5 +187,9 @@ h3 {
     background: #c82333;
 }
 
-
-
+.card-body {
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}

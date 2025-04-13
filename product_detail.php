@@ -40,11 +40,26 @@ if (!$product) {
         <div class="col-md-6">
             <h2 class="text-success fw-bold"><?php echo htmlspecialchars($product['name']); ?></h2>
             <p class="text-muted">Danh mục: <?php echo htmlspecialchars($product['category']); ?></p>
-            <h4 class="text-danger">Giá: <?php echo number_format($product['price'], 0, ',', '.'); ?> VND</h4>
+            <h4 class="text-danger">Giá: <?php echo number_format($product['selling_price'], 0, ',', '.'); ?> VND</h4>
             <p class="mt-3">Mô tả sản phẩm: <br> <?php echo nl2br(htmlspecialchars($product['description'])); ?></p>
+
+            <!-- Nhãn tồn kho -->
+            <div class="mt-3">
+                <?php if ($product['stock_quantity'] > 0): ?>
+                    <span class="badge bg-success">✔ Còn hàng</span>
+                <?php else: ?>
+                    <span class="badge bg-danger">✖ Hết hàng</span>
+                <?php endif; ?>
+            </div>
+
             <div class="mt-4">
-                <a href="cart.php?action=add&id=<?php echo $product['product_id']; ?>" class="btn btn-success">🛒 Thêm vào giỏ hàng</a>
-                <a href="products.php" class="btn btn-outline-secondary ms-2">⬅ Quay lại</a>
+                <form action="cart.php" method="POST">
+                    <input type="hidden" name="product_id" value="<?php echo $product['product_id']; ?>">
+                    <button type="submit" class="btn btn-success" <?php if ($product['stock_quantity'] <= 0) echo 'disabled'; ?>>
+                        🛒 Thêm vào giỏ hàng
+                    </button>
+                    <a href="products.php" class="btn btn-outline-secondary ms-2">⬅ Quay lại</a>
+                </form>
             </div>
         </div>
     </div>

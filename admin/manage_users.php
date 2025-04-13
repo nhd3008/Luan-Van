@@ -12,16 +12,7 @@ require_once __DIR__ . '/../database/db_connect.php';
     <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
 <body>
-    <header>
-        <h2>👤 Quản lý Người dùng</h2>
-        <nav>
-            <a href="index.php">🏠 Trang chủ Admin</a>
-            <a href="manage_products.php">📦 Quản lý Sản phẩm</a>
-            <a href="manage_orders.php">📜 Quản lý Đơn hàng</a>
-            <a href="manage_users.php">👤 Quản lý Người dùng</a>
-            <a href="../auth/logout.php">🚪 Đăng xuất</a>
-        </nav>
-    </header>
+<?php include_once __DIR__ . '/nav_admin.php'; ?>
     
     <section>
         <h3>📋 Danh sách Người dùng</h3>

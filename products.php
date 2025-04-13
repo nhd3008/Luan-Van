@@ -6,19 +6,19 @@ $search = "";
 $selected_category = isset($_GET['category']) ? $_GET['category'] : '';
 
 if ($selected_category && in_array($selected_category, ["Tăng cường miễn dịch", "Tốt cho tiêu hóa", "Hỗ trợ giảm cân", "Làm đẹp da"])) {
-    $stmt = $conn->prepare("SELECT * FROM products WHERE category = ?");
+    $stmt = $conn->prepare("SELECT * FROM products WHERE category = ? AND status = 'selling'");
     $stmt->bind_param("s", $selected_category);
     $stmt->execute();
     $result = $stmt->get_result();
 } elseif (isset($_GET['search'])) {
     $search = trim($_GET['search']);
-    $stmt = $conn->prepare("SELECT * FROM products WHERE name LIKE ?");
+    $stmt = $conn->prepare("SELECT * FROM products WHERE name LIKE ? AND status = 'selling'");
     $search_param = "%$search%";
     $stmt->bind_param("s", $search_param);
     $stmt->execute();
     $result = $stmt->get_result();
 } else {
-    $result = $conn->query("SELECT * FROM products");
+    $result = $conn->query("SELECT * FROM products WHERE status = 'selling'");
 }
 
 $products = [];
@@ -72,15 +72,25 @@ $categories = ["Tăng cường miễn dịch", "Tốt cho tiêu hóa", "Hỗ tr�
                         <div class="card-body text-center">
                             <h5 class="card-title text-success fw-bold"><?php echo htmlspecialchars($product['name']); ?></h5>
                             <p class="text-muted small mb-1">Danh mục: <?php echo htmlspecialchars($product['category']); ?></p>
-                            <p class="card-text">Giá: <strong><?php echo number_format($product['price'], 0, ',', '.'); ?> VND</strong></p>
+                            <p class="card-text">Giá: <strong><?php echo number_format($product['selling_price'], 0, ',', '.'); ?> VND</strong></p>
+
+                            <!-- Nhãn tồn kho -->
+                            <?php if ($product['stock_quantity'] > 0): ?>
+                                <span class="badge bg-success mb-2">✔ Còn hàng</span>
+                            <?php else: ?>
+                                <span class="badge bg-danger mb-2">✖ Hết hàng</span>
+                            <?php endif; ?>
+
                             <div class="d-grid gap-2 mt-3">
                                 <a href="product_detail.php?id=<?php echo $product['product_id']; ?>" class="btn btn-outline-primary btn-sm">Xem chi tiết</a>
                                 <form method="POST" action="cart.php" class="d-grid gap-2">
                                     <input type="hidden" name="product_id" value="<?php echo $product['product_id']; ?>">
-                                    <button type="submit" class="btn btn-success btn-sm">🛒 Thêm vào giỏ</button>
+                                    <button type="submit" class="btn btn-success btn-sm" <?php if ($product['stock_quantity'] <= 0) echo 'disabled'; ?>>
+                                        🛒 Thêm vào giỏ
+                                    </button>
                                 </form>
-
                             </div>
+
                         </div>
                     </div>
                 </div>

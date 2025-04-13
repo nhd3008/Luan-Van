@@ -2,50 +2,70 @@
 session_start();
 require_once 'database/db_connect.php';
 
-// Kiểm tra nếu người dùng đã đăng nhập
 if (!isset($_SESSION['user_id'])) {
     die("<p class='text-center text-danger'>Bạn cần <a href='auth/login.php'>đăng nhập</a> để thêm sản phẩm vào giỏ hàng.</p>");
 }
-
-
 
 $user_id = $_SESSION['user_id'];
 
 // Xử lý thêm sản phẩm vào giỏ hàng
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
-
-    // Kiểm tra nếu là admin thì không cho thêm
     if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
         die("<p class='text-center text-danger'>Tài khoản admin không cần thêm vào giỏ hàng. Bạn không cần mua vào kho mà lấy. <a href='index.php'>Quay lại trang chủ</a></p>");
     }
 
     $product_id = $_POST['product_id'];
 
+    // Lấy số lượng tồn kho
+    $stmt = $conn->prepare("SELECT stock_quantity FROM products WHERE product_id = ?");
+    $stmt->bind_param("i", $product_id);
+    $stmt->execute();
+    $stock_result = $stmt->get_result();
+    $stock_data = $stock_result->fetch_assoc();
+    $stock_quantity = $stock_data['stock_quantity'] ?? 0;
 
-    // Kiểm tra xem sản phẩm đã có trong giỏ hàng của user chưa
+    // Lấy số lượng hiện tại trong giỏ
     $stmt = $conn->prepare("SELECT quantity FROM cart WHERE user_id = ? AND product_id = ?");
     $stmt->bind_param("ii", $user_id, $product_id);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
-        // Nếu sản phẩm đã có, cập nhật số lượng
         $row = $result->fetch_assoc();
-        $new_quantity = $row['quantity'] + 1;
+        $current_quantity = $row['quantity'];
+        if ($current_quantity + 1 > $stock_quantity) {
+            die("<p class='text-center text-danger'>Số lượng bạn muốn thêm đã vượt quá tồn kho. <a href='index.php'>Quay lại</a></p>");
+        }
+        $new_quantity = $current_quantity + 1;
         $stmt = $conn->prepare("UPDATE cart SET quantity = ? WHERE user_id = ? AND product_id = ?");
         $stmt->bind_param("iii", $new_quantity, $user_id, $product_id);
         $stmt->execute();
     } else {
-        // Nếu chưa có, thêm mới vào giỏ hàng
+        if ($stock_quantity < 1) {
+            die("<p class='text-center text-danger'>Sản phẩm này hiện đã hết hàng. <a href='index.php'>Quay lại</a></p>");
+        }
         $stmt = $conn->prepare("INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, 1)");
         $stmt->bind_param("ii", $user_id, $product_id);
         $stmt->execute();
     }
 }
 
-// Xử lý cập nhật số lượng sản phẩm trong giỏ hàng
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_cart'])) {
+// Cập nhật giỏ hàng
+if ($_SERVER["REQUEST_METHOD"] == "POST" && (isset($_POST['update_cart']) || isset($_POST['checkout_now']))) {
     foreach ($_POST['quantity'] as $product_id => $quantity) {
+        // Lấy số lượng tồn kho
+        $stmt = $conn->prepare("SELECT stock_quantity FROM products WHERE product_id = ?");
+        $stmt->bind_param("i", $product_id);
+        $stmt->execute();
+        $stock_result = $stmt->get_result();
+        $stock_data = $stock_result->fetch_assoc();
+        $stock_quantity = $stock_data['stock_quantity'] ?? 0;
+
+        if ($quantity > $stock_quantity) {
+            echo "<div class='alert alert-danger text-center'>Số lượng cập nhật vượt quá số lượng tồn kho cho sản phẩm ID $product_id.</div>";
+            continue;
+        }
+
         if ($quantity > 0) {
             $stmt = $conn->prepare("UPDATE cart SET quantity = ? WHERE user_id = ? AND product_id = ?");
             $stmt->bind_param("iii", $quantity, $user_id, $product_id);
@@ -56,24 +76,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_cart'])) {
             $stmt->execute();
         }
     }
+
+    // Nếu người dùng bấm "Thanh toán" thì chuyển hướng
+    if (isset($_POST['checkout_now'])) {
+        header("Location: checkout.php");
+        exit();
+    }
 }
+
 
 // Xử lý xóa sản phẩm khỏi giỏ hàng
 if (isset($_GET['remove'])) {
-    $remove_id = $_GET['remove'];
+    $remove_id = intval($_GET['remove']);
+
+    // Xóa khỏi giỏ hàng
     $stmt = $conn->prepare("DELETE FROM cart WHERE user_id = ? AND product_id = ?");
     $stmt->bind_param("ii", $user_id, $remove_id);
     $stmt->execute();
+
+    // Sau khi xóa, reload lại trang để cập nhật giao diện
+    header("Location: cart.php");
+    exit();
 }
 
-// Lấy giỏ hàng từ database
-$stmt = $conn->prepare("SELECT p.product_id, p.name, p.price, p.image_url, c.quantity FROM cart c JOIN products p ON c.product_id = p.product_id WHERE c.user_id = ?");
+
+// Lấy thông tin giỏ hàng
+$stmt = $conn->prepare("SELECT p.product_id, p.name, p.selling_price, p.image_url, p.unit, c.quantity FROM cart c JOIN products p ON c.product_id = p.product_id WHERE c.user_id = ?");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
 $cart_items = $result->fetch_all(MYSQLI_ASSOC);
 
-// Tính tổng tiền
 $total = 0;
 ?>
 
@@ -112,16 +145,31 @@ $total = 0;
                         <tr>
                             <td><img src="<?php echo htmlspecialchars($item['image_url']); ?>" width="60" class="rounded"></td>
                             <td><?php echo htmlspecialchars($item['name']); ?></td>
-                            <td class="text-danger fw-bold"><?php echo number_format($item['price'], 0, ',', '.'); ?> VND</td>
+                            <td class="text-danger fw-bold"><?php echo number_format($item['selling_price'], 0, ',', '.'); ?> VND</td>
                             <td>
                                 <input type="number" name="quantity[<?php echo $item['product_id']; ?>]" value="<?php echo $item['quantity']; ?>" min="1" class="form-control text-center" style="width: 80px; display: inline-block;">
                             </td>
-                            <td class="fw-bold"><?php echo number_format($item['price'] * $item['quantity'], 0, ',', '.'); ?> VND</td>
+                            <td class="fw-bold">
+                                <?php
+                                    $unit = $item['unit'];
+                                    $quantity = $item['quantity'];
+
+                                    if ($unit == 'kg') {
+                                        $weight = $quantity * 0.5; // mỗi đơn vị là 0.5kg
+                                        $subtotal = $item['selling_price'] * $weight;
+                                        echo number_format($subtotal, 0, ',', '.') . " VND" . "<br><small>({$weight} kg)</small>";
+                                    } else {
+                                        $subtotal = $item['selling_price'] * $quantity;
+                                        echo number_format($subtotal, 0, ',', '.') . " VND" . "<br><small>({$quantity} trái)</small>";
+                                    }
+
+                                    $total += $subtotal;
+                                ?>
+                            </td>
                             <td>
                                 <a href="cart.php?remove=<?php echo $item['product_id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?');">Xóa</a>
                             </td>
                         </tr>
-                        <?php $total += $item['price'] * $item['quantity']; ?>
                     <?php endforeach; ?>
                 </tbody>
             </table>
@@ -133,6 +181,7 @@ $total = 0;
         </form>
     <?php endif; ?>
 </div>
+
 <?php include 'includes/footer.php'; ?>
 </body>
 </html>

@@ -1,4 +1,5 @@
 <?php
+/*
 require_once '../database/db_connect.php';
 
 $sql = "SELECT * FROM products";
@@ -39,7 +40,7 @@ $result = $conn->query($sql);
         <tr>
             <td><?php echo $row['product_id']; ?></td>
             <td><?php echo htmlspecialchars($row['name']); ?></td>
-            <td><?php echo number_format($row['price'], 0, ',', '.') . ' VND'; ?></td>
+            <td><?php echo number_format($row['selling_price'], 0, ',', '.') . ' VND'; ?></td>
             <td><?php echo htmlspecialchars($row['description']); ?></td>
             <td>
                 <?php if (!empty($row['image_url'])): ?>

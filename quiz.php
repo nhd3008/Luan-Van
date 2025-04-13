@@ -1,9 +1,16 @@
 <?php
-// quiz.php - Trang người dùng nhập quiz tư vấn trái cây
 session_start();
 include 'includes/header.php';
 ?>
-
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz Tư vấn Trái cây</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
 <div class="container py-5">
   <h2 class="text-center mb-4">Quiz tư vấn trái cây theo sức khỏe 🍎</h2>
   <form action="quiz_result.php" method="POST">
@@ -24,8 +31,8 @@ include 'includes/header.php';
 
     <div class="mb-4">
       <label class="form-label"><strong>3. Bạn thường ăn trái cây vào thời điểm nào?</strong></label><br>
-      <input type="radio" name="time" value="sáng"> Buổi sáng 🌞<br>
-      <input type="radio" name="time" value="trưa"> Buổi trưa 🌤<br>
+      <input type="radio" name="time" value="sáng"> Buổi sáng ☀️<br>
+      <input type="radio" name="time" value="trưa"> Buổi trưa ⛅<br>
       <input type="radio" name="time" value="tối"> Buổi tối 🌙
     </div>
 
@@ -39,5 +46,8 @@ include 'includes/header.php';
     </div>
   </form>
 </div>
-
+</body>
+</html>
 <?php include 'includes/footer.php'; ?>
+
+<?php

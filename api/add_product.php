@@ -1,6 +1,6 @@
-<?php
+<!--<?php
+/*
 require_once  '../database/db_connect.php';
-
 // Danh sách danh mục sản phẩm
 $categories = [
     "Tăng cường miễn dịch",
@@ -20,7 +20,6 @@ function generateUniqueProductID($conn) {
     $stmt->close();
     return $product_id;
 }
-
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = trim($_POST['name']);
@@ -116,4 +115,4 @@ $conn->close();
 </div>
 
 </body>
-</html>
+</html> -->
