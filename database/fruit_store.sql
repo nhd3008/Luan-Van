@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 13, 2025 at 11:02 AM
+-- Generation Time: Apr 16, 2025 at 09:09 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -33,17 +33,6 @@ CREATE TABLE `cart` (
   `product_id` int(11) NOT NULL,
   `quantity` int(11) DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `health_goals`
---
-
-CREATE TABLE `health_goals` (
-  `goal_id` int(11) NOT NULL,
-  `goal_name` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -98,21 +87,6 @@ CREATE TABLE `inventory_transactions` (
   `import_price` decimal(10,2) DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
   `note` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `nutrition_info`
---
-
-CREATE TABLE `nutrition_info` (
-  `nutrition_id` int(11) NOT NULL,
-  `product_id` int(11) DEFAULT NULL,
-  `weight` varchar(50) NOT NULL,
-  `calories` int(11) DEFAULT NULL,
-  `vitamin_c` varchar(50) DEFAULT NULL,
-  `sugar` decimal(5,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -261,17 +235,6 @@ INSERT INTO `products` (`product_id`, `name`, `selling_price`, `description`, `c
 -- --------------------------------------------------------
 
 --
--- Table structure for table `product_health_goals`
---
-
-CREATE TABLE `product_health_goals` (
-  `product_id` int(11) NOT NULL,
-  `goal_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `quiz_results`
 --
 
@@ -357,7 +320,7 @@ CREATE TABLE `users` (
   `username` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `role` enum('admin','user') DEFAULT 'user',
+  `role` varchar(50) DEFAULT 'user',
   `age` int(11) DEFAULT NULL,
   `health_goal` varchar(50) DEFAULT NULL,
   `flavor_preference` varchar(50) DEFAULT NULL,
@@ -402,13 +365,6 @@ ALTER TABLE `cart`
   ADD KEY `product_id` (`product_id`);
 
 --
--- Indexes for table `health_goals`
---
-ALTER TABLE `health_goals`
-  ADD PRIMARY KEY (`goal_id`),
-  ADD UNIQUE KEY `goal_name` (`goal_name`);
-
---
 -- Indexes for table `inventory`
 --
 ALTER TABLE `inventory`
@@ -420,13 +376,6 @@ ALTER TABLE `inventory`
 --
 ALTER TABLE `inventory_transactions`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `product_id` (`product_id`);
-
---
--- Indexes for table `nutrition_info`
---
-ALTER TABLE `nutrition_info`
-  ADD PRIMARY KEY (`nutrition_id`),
   ADD KEY `product_id` (`product_id`);
 
 --
@@ -463,13 +412,6 @@ ALTER TABLE `posts`
 ALTER TABLE `products`
   ADD PRIMARY KEY (`product_id`),
   ADD UNIQUE KEY `product_id` (`product_id`);
-
---
--- Indexes for table `product_health_goals`
---
-ALTER TABLE `product_health_goals`
-  ADD PRIMARY KEY (`product_id`,`goal_id`),
-  ADD KEY `goal_id` (`goal_id`);
 
 --
 -- Indexes for table `quiz_results`
@@ -526,12 +468,6 @@ ALTER TABLE `cart`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
--- AUTO_INCREMENT for table `health_goals`
---
-ALTER TABLE `health_goals`
-  MODIFY `goal_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `inventory`
 --
 ALTER TABLE `inventory`
@@ -542,12 +478,6 @@ ALTER TABLE `inventory`
 --
 ALTER TABLE `inventory_transactions`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `nutrition_info`
---
-ALTER TABLE `nutrition_info`
-  MODIFY `nutrition_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `orders`
@@ -627,12 +557,6 @@ ALTER TABLE `inventory_transactions`
   ADD CONSTRAINT `inventory_transactions_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`);
 
 --
--- Constraints for table `nutrition_info`
---
-ALTER TABLE `nutrition_info`
-  ADD CONSTRAINT `nutrition_info_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE;
-
---
 -- Constraints for table `orders`
 --
 ALTER TABLE `orders`
@@ -650,13 +574,6 @@ ALTER TABLE `order_items`
 --
 ALTER TABLE `order_shipping`
   ADD CONSTRAINT `order_shipping_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`);
-
---
--- Constraints for table `product_health_goals`
---
-ALTER TABLE `product_health_goals`
-  ADD CONSTRAINT `product_health_goals_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `product_health_goals_ibfk_2` FOREIGN KEY (`goal_id`) REFERENCES `health_goals` (`goal_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `quiz_results`

@@ -18,7 +18,10 @@ require_once __DIR__ . '/../database/db_connect.php';
 <section>
     <h3>📋 Danh sách Sản phẩm</h3>
     <?php
-    $query = "SELECT product_id, name, selling_price, unit, stock_quantity FROM products";
+    // Lấy các sản phẩm có trạng thái là 'selling'
+    $query = "SELECT product_id, name, selling_price, unit, stock_quantity 
+              FROM products 
+              WHERE status = 'selling'";
     $result = $conn->query($query);
 
     $unit_labels = [

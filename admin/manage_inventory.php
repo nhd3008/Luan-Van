@@ -15,20 +15,46 @@ require_once __DIR__ . '/../database/db_connect.php';
 <?php include_once __DIR__ . '/nav_admin.php'; ?>
 
 <section>
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3>📄 Danh sách sản phẩm trong kho</h3>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    <h3>📄 Danh sách sản phẩm trong kho</h3>
+    <div style="display: flex; gap: 10px; align-items: center;">
+        <form method="get" style="display: flex; align-items: center;">
+            <label for="filter" style="margin-right: 8px; font-weight: 500;">Lọc:</label>
+            <select name="filter" id="filter" class="filter-select" onchange="this.form.submit()">
+                <option value="">📦 Tất cả</option>
+                <option value="low" <?= isset($_GET['filter']) && $_GET['filter'] === 'low' ? 'selected' : '' ?>>⚠ Sắp hết (&lt; 5)</option>
+                <option value="in_stock" <?= isset($_GET['filter']) && $_GET['filter'] === 'in_stock' ? 'selected' : '' ?>>✅ Còn hàng (&ge; 5)</option>
+            </select>
+        </form>
         <a class="btn btn-primary" href="add_new_product.php">➕ Thêm sản phẩm mới</a>
     </div>
+</div>
 
     <?php if (isset($_GET['success'])): ?>
         <p class="success-message">✅ Nhập kho thành công!</p>
     <?php endif; ?>
 
     <?php
-    $query = "SELECT product_id, name, stock_quantity, status FROM products ORDER BY created_at DESC";
-    $result = $conn->query($query);
+    // Xử lý lọc theo lượng tồn kho
+    $filter = $_GET['filter'] ?? '';
+    $condition = '';
 
-    if ($result && $result->num_rows > 0): ?>
+    if ($filter === 'low') {
+        $condition = "WHERE stock_quantity < 5";
+    } elseif ($filter === 'in_stock') {
+        $condition = "WHERE stock_quantity >= 5";
+    }
+
+    $query = "SELECT product_id, name, stock_quantity, status 
+              FROM products 
+              $condition
+              ORDER BY 
+                CASE WHEN status = 'not_selling' THEN 0 ELSE 1 END,
+                created_at DESC";
+    $result = $conn->query($query);
+    ?>
+
+    <?php if ($result && $result->num_rows > 0): ?>
         <table class="admin-table">
             <thead>
                 <tr>

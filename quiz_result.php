@@ -6,40 +6,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 include 'database/db_connect.php'; // MySQLi $conn
 
 $quiz = $_SESSION['quiz'] ?? [];
+
 $goal = $quiz['goal'] ?? '';
 $taste = $quiz['taste'] ?? '';
 $time = $quiz['time'] ?? '';
 $allergy = $quiz['allergy'] ?? '';
+$health_issue = $quiz['health_issue'] ?? '';
+$diet = $quiz['diet'] ?? [];
+$support = $quiz['support'] ?? [];
+$pregnant = $quiz['pregnant'] ?? '';
+$budget = $quiz['budget'] ?? '';
+$custom_note = $quiz['custom_note'] ?? '';
 
-function get_ai_suggestion($goal, $taste, $time, $allergy) {
-    $api_key = "AIzaSyC16-nPbuy_GwVCiSv1PZ3cj3D9Qi-mv6k";
-    $prompt = "Tôi muốn ăn trái cây để $goal.";
-    $prompt .= $taste ? " Tôi thích vị $taste." : '';
-    $prompt .= $time ? " Tôi thường ăn vào buổi $time." : '';
-    $prompt .= $allergy ? " Tôi bị dị ứng với $allergy." : '';
-    $prompt .= " Hãy gợi ý những loại trái cây phù hợp, bằng tiếng Việt, dưới dạng danh sách.";
 
-    $data = [
-        'contents' => [[ 'parts' => [[ 'text' => $prompt ]] ]]
-    ];
+function get_ai_suggestion($goal, $taste, $time, $allergy, $health_issue, $diet, $support, $pregnant, $custom_note) {
+  $api_key = "AIzaSyC16-nPbuy_GwVCiSv1PZ3cj3D9Qi-mv6k";
+  $prompt = "Tôi muốn tìm loại trái cây phù hợp với các tiêu chí sau:";
 
-    $url = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=$api_key";
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-    $response = curl_exec($ch);
-    $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
+  if ($goal) $prompt .= " Mục tiêu sức khỏe: $goal.";
+  if ($taste) $prompt .= " Vị yêu thích: $taste.";
+  if ($time) $prompt .= " Thời điểm ăn thường xuyên: $time.";
+  if ($allergy) $prompt .= " Tôi dị ứng với: $allergy.";
+  if ($health_issue) $prompt .= " Vấn đề sức khỏe đang gặp: $health_issue.";
+  if (!empty($diet)) $prompt .= " Tôi đang theo chế độ ăn: " . implode(", ", $diet) . ".";
+  if (!empty($support)) $prompt .= " Tôi muốn trái cây hỗ trợ: " . implode(", ", $support) . ".";
+  if ($pregnant) $prompt .= " Tôi " . ($pregnant === "có" ? "đang mang thai hoặc cho con bú." : "không mang thai hoặc cho con bú.");
+  if ($custom_note) $prompt .= " Ghi chú thêm: $custom_note.";
 
-    $result = json_decode($response, true);
-    if ($http_status !== 200 || !isset($result['candidates'][0]['content']['parts'][0]['text'])) {
-        return "❌ Lỗi Gemini API ($http_status): " . ($result['error']['message'] ?? 'Không rõ lỗi');
-    }
-    return $result['candidates'][0]['content']['parts'][0]['text'];
+  $prompt .= " Hãy gợi ý những loại trái cây phù hợp, bằng tiếng Việt, dưới dạng danh sách gạch đầu dòng.";
+
+  $data = [
+      'contents' => [[ 'parts' => [[ 'text' => $prompt ]] ]]
+  ];
+
+  $url = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=$api_key";
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+  $response = curl_exec($ch);
+  $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+  curl_close($ch);
+
+  $result = json_decode($response, true);
+  if ($http_status !== 200 || !isset($result['candidates'][0]['content']['parts'][0]['text'])) {
+      return "❌ Lỗi Gemini API ($http_status): " . ($result['error']['message'] ?? 'Không rõ lỗi');
+  }
+  return $result['candidates'][0]['content']['parts'][0]['text'];
 }
 
-$suggestions = get_ai_suggestion($goal, $taste, $time, $allergy);
+
+$suggestions = get_ai_suggestion($goal, $taste, $time, $allergy, $health_issue, $diet, $support, $pregnant, $custom_note);
+
 
 // Trích xuất tên trái cây
 $known_fruits = [];
@@ -124,10 +142,15 @@ if (!empty($fruit_names)) {
   <div class="alert alert-info shadow-sm border-start border-5 border-info">
     <h5 class="fw-bold mb-3"><i class="fa-solid fa-circle-info me-2"></i>Thông tin bạn đã chọn:</h5>
     <ul class="mb-0 ps-3">
-      <li><strong>Mục tiêu:</strong> <?= htmlspecialchars($goal) ?></li>
-      <li><strong>Vị yêu thích:</strong> <?= htmlspecialchars($taste) ?></li>
-      <li><strong>Thời điểm ăn:</strong> <?= htmlspecialchars($time) ?></li>
-      <li><strong>Dị ứng với:</strong> <?= htmlspecialchars($allergy ?: 'Không') ?></li>
+    <li><strong>Mục tiêu:</strong> <?= htmlspecialchars($goal) ?></li>
+    <li><strong>Vị thích:</strong> <?= htmlspecialchars($taste) ?></li>
+    <li><strong>Thời điểm ăn:</strong> <?= htmlspecialchars($time) ?></li>
+    <li><strong>Dị ứng:</strong> <?= htmlspecialchars($allergy) ?></li>
+    <li><strong>Vấn đề sức khỏe:</strong> <?= htmlspecialchars($health_issue) ?></li>
+    <li><strong>Chế độ ăn:</strong> <?= implode(", ", $diet) ?></li>
+    <li><strong>Hỗ trợ mong muốn:</strong> <?= implode(", ", $support) ?></li>
+    <li><strong>Đang mang thai / cho con bú:</strong> <?= htmlspecialchars($pregnant) ?></li>
+    <li><strong>Ghi chú thêm:</strong> <?= nl2br(htmlspecialchars($custom_note)) ?></li>
     </ul>
   </div>
 
@@ -143,19 +166,6 @@ if (!empty($fruit_names)) {
     </div>
   </div>
 
-  <!-- Từ khóa phát hiện -->
-  <?php if (!empty($fruit_names)): ?>
-    <div class="alert alert-light border-start border-success border-4 shadow-sm">
-      <h6 class="fw-bold text-success"><i class="fa-solid fa-magnifying-glass me-2"></i>Từ khóa trái cây phát hiện:</h6>
-      <div class="d-flex flex-wrap gap-2 mt-2">
-        <?php foreach ($fruit_names as $keyword): ?>
-          <span class="badge bg-success-subtle text-success border border-success rounded-pill px-3 py-2">
-            <i class="fa-solid fa-lemon me-1"></i><?= htmlspecialchars($keyword) ?>
-          </span>
-        <?php endforeach; ?>
-      </div>
-    </div>
-  <?php endif; ?>
 
   <!-- Sản phẩm phù hợp -->
   <?php if (!empty($matched_products)): ?>
