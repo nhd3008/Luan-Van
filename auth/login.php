@@ -18,28 +18,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("Lỗi bảo mật! Vui lòng thử lại.");
     }
 
+    // Chuẩn bị và thực hiện truy vấn để lấy thông tin người dùng
     $stmt = $conn->prepare("SELECT user_id, password, role FROM users WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
-    
+
     if ($result->num_rows > 0) {
         $user = $result->fetch_assoc();
+        // Kiểm tra mật khẩu
         if (password_verify($password, $user['password'])) {
+            // Regenerate session ID để bảo mật
             session_regenerate_id(true);
             $_SESSION['user_id'] = $user['user_id'];
             $_SESSION['role'] = $user['role']; // Lưu vai trò người dùng vào session
-        
+
             // Chuyển hướng theo quyền
-            if ($user['role'] === 'admin') {
-                echo "<script>alert('Đăng nhập thành công!'); window.location.href='../admin/index.php';</script>";
-            } else {
-                echo "<script>alert('Đăng nhập thành công!'); window.location.href='../index.php';</script>";
+            switch ($user['role']) {
+                case 'admin':
+                    echo "<script>alert('Đăng nhập thành công!'); window.location.href='../admin/index.php';</script>";
+                    break;
+                case 'manager':
+                    echo "<script>alert('Đăng nhập thành công!'); window.location.href='../admin/manage_inventory.php';</script>";
+                    break;
+                case 'user':
+                    echo "<script>alert('Đăng nhập thành công!'); window.location.href='../index.php';</script>";
+                    break;
+                default:
+                    // Vai trò không xác định
+                    echo "<script>alert('Vai trò không hợp lệ!'); window.location.href='../index.php';</script>";
+                    break;
             }
         } else {
             echo "<script>alert('Mật khẩu không đúng!');</script>";
         }
-        
     } else {
         echo "<script>alert('Email không tồn tại!');</script>";
     }

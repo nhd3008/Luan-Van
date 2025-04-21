@@ -2,12 +2,12 @@
 require_once __DIR__ . '/../includes/middleware_admin.php';
 require_once __DIR__ . '/../database/db_connect.php';
 
-// Lấy danh sách nhà cung cấp
+// Lấy danh sách nhà cung cấp từ bảng suppliers
 $supplier_options = [];
-$supplier_result = $conn->query("SELECT DISTINCT supplier FROM inventory ORDER BY supplier ASC");
+$supplier_result = $conn->query("SELECT DISTINCT name FROM suppliers ORDER BY name ASC");
 if ($supplier_result) {
     while ($row = $supplier_result->fetch_assoc()) {
-        $supplier_options[] = $row['supplier'];
+        $supplier_options[] = $row['name'];  // Lưu tên nhà cung cấp vào mảng
     }
 }
 
@@ -23,7 +23,6 @@ function generateUniqueProductID($conn) {
     $stmt->close();
     return $product_id;
 }
-
 // Xử lý khi submit form
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name']);
@@ -31,18 +30,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $purchase_price = (float)$_POST['purchase_price'];
     $unit = $_POST['unit'];
     $supplier = $_POST['supplier'];
+    $invoice_code = $_POST['invoice_code'];  // Lấy mã hoá đơn từ form
 
-    if ($name !== '' && $quantity > 0 && $purchase_price > 0 && $supplier !== '') {
+    if ($name !== '' && $quantity > 0 && $purchase_price > 0 && $supplier !== '' && $invoice_code !== '') {
         $product_id = generateUniqueProductID($conn);
 
+        // Thêm sản phẩm vào bảng products
         $stmt = $conn->prepare("INSERT INTO products 
             (product_id, name, stock_quantity, unit, category, discount, visibility, status)
             VALUES (?, ?, ?, ?, 'Chung', 0.00, 'public', 'not_selling')");
         $stmt->bind_param("isis", $product_id, $name, $quantity, $unit);
         $stmt->execute();
 
-        $inv = $conn->prepare("INSERT INTO inventory (product_id, quantity, purchase_price, supplier) VALUES (?, ?, ?, ?)");
-        $inv->bind_param("iids", $product_id, $quantity, $purchase_price, $supplier);
+        // Thêm thông tin nhập kho vào bảng inventory, bao gồm mã hoá đơn
+        $inv = $conn->prepare("INSERT INTO inventory (product_id, quantity, purchase_price, supplier, invoice_code) 
+                                           VALUES (?, ?, ?, ?, ?)");
+        $inv->bind_param("iidsi", $product_id, $quantity, $purchase_price, $supplier, $invoice_code);
         $inv->execute();
 
         header("Location: manage_inventory.php?success=1");
@@ -51,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "Vui lòng nhập đầy đủ và hợp lệ!";
     }
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -176,7 +180,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <option value="<?= htmlspecialchars($supplier) ?>"><?= htmlspecialchars($supplier) ?></option>
             <?php endforeach; ?>
         </select>
-
+        <label for="invoice_code">Mã hoá đơn:</label>
+        <input type="text" name="invoice_code" id="invoice_code" class="form-control" required>
+ 
         <button type="submit">✔ Thêm sản phẩm & Nhập kho</button>
     </form>
 </section>

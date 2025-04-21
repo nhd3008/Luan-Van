@@ -77,45 +77,58 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $phone = $_POST['phone'];
     $address = $_POST['address'];
 
-    // Tạo đơn hàng
-    $stmt = $conn->prepare("INSERT INTO orders (user_id, total_price, payment_method, order_status, created_at) 
-                            VALUES (?, ?, ?, 'pending', NOW())");
-    $stmt->bind_param("ids", $user_id, $total_price, $payment_method);
-    $stmt->execute();
-    $order_id = $stmt->insert_id;
+      // Tạo đơn hàng
+      $stmt = $conn->prepare("INSERT INTO orders (user_id, total_price, payment_method, order_status, created_at) 
+      VALUES (?, ?, ?, 'pending', NOW())");
+$stmt->bind_param("ids", $user_id, $total_price, $payment_method);
+$stmt->execute();
+$order_id = $stmt->insert_id;
 
-    // Lưu sản phẩm trong đơn
-    foreach ($cart_items as $item) {
-        $stmt = $conn->prepare("INSERT INTO order_items (order_id, product_id, quantity, price) 
-                                VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("iiid", $order_id, $item['product_id'], $item['quantity'], $item['selling_price']);
-        $stmt->execute();
-    }
+// Lưu sản phẩm trong đơn
+foreach ($cart_items as $item) {
+$stmt = $conn->prepare("INSERT INTO order_items (order_id, product_id, quantity, price) 
+          VALUES (?, ?, ?, ?)");
+$stmt->bind_param("iiid", $order_id, $item['product_id'], $item['quantity'], $item['selling_price']);
+$stmt->execute();
+}
 
-    // Lưu thông tin giao hàng
-    $stmt = $conn->prepare("INSERT INTO order_shipping (order_id, full_name, phone, address) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("isss", $order_id, $full_name, $phone, $address);
-    $stmt->execute();
+// Lưu thông tin giao hàng
+$stmt = $conn->prepare("INSERT INTO order_shipping (order_id, full_name, phone, address) VALUES (?, ?, ?, ?)");
+$stmt->bind_param("isss", $order_id, $full_name, $phone, $address);
+$stmt->execute();
 
-    // Xoá giỏ hàng
-    $stmt = $conn->prepare("DELETE FROM cart WHERE user_id = ?");
-    $stmt->bind_param("i", $user_id);
-    $stmt->execute();
+// Xoá giỏ hàng
+$stmt = $conn->prepare("DELETE FROM cart WHERE user_id = ?");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
 
-    // Cập nhật tồn kho
-    foreach ($cart_items as $item) {
-        $stmt = $conn->prepare("UPDATE products SET stock_quantity = stock_quantity - ? WHERE product_id = ?");
-        $stmt->bind_param("ii", $item['quantity'], $item['product_id']);
-        $stmt->execute();
-    }
+// Cập nhật tồn kho
+foreach ($cart_items as $item) {
+$stmt = $conn->prepare("UPDATE products SET stock_quantity = stock_quantity - ? WHERE product_id = ?");
+$stmt->bind_param("ii", $item['quantity'], $item['product_id']);
+$stmt->execute();
+}
 
-    unset($_SESSION['cart']);
+unset($_SESSION['cart']);
 
-    echo "<script>
-        alert('🎉 Đơn hàng của bạn đã được đặt thành công!');
-        window.location.href = 'order_history.php';
-    </script>";
+ // Nếu chọn PayPal thì redirect sang trang tạo thanh toán PayPal
+ if ($payment_method === 'paypal') {
+    header("Location: create_paypal_payment.php?order_id=$order_id&amount=$total_price");
     exit();
+}
+
+if ($payment_method === 'vnpay') {
+    // Chuyển hướng sang trang tạo request VNPAY
+    header("Location: create_vnpay_payment.php?order_id=$order_id&amount=$total_price");
+    exit();
+}
+
+// Ngược lại: xử lý thông thường (COD, bank, momo,...)
+echo "<script>
+alert('🎉 Đơn hàng của bạn đã được đặt thành công!');
+window.location.href = 'order_history.php';
+</script>";
+exit();
 }
 ?>
 
@@ -152,6 +165,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <option value="cod">Thanh toán khi nhận hàng (COD)</option>
                 <option value="bank">Chuyển khoản ngân hàng</option>
                 <option value="momo">Ví Momo</option>
+                <option value="vnpay">Thanh toán VNPay</option>
+                <option value="paypal">Thanh Toán paypal</option>
             </select>
         </div>
         <button type="submit" class="btn btn-success w-50">Xác nhận thanh toán</button>

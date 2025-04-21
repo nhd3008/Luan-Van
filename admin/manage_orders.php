@@ -69,7 +69,7 @@ if (isset($_GET['id']) && isset($_GET['status'])) {
 <?php include_once __DIR__ . '/nav_admin.php'; ?>
 
 <section>
-    <h3>📋 Danh sách Đơn hàng</h3>
+    <h3>📋 Danh sách Đơn hàng đang chờ xử lý</h3>
 
     <?php
     if (isset($_SESSION['success'])) {
@@ -81,15 +81,15 @@ if (isset($_GET['id']) && isset($_GET['status'])) {
         unset($_SESSION['error']);
     }
 
-    // Lấy đơn hàng chưa giao và chưa huỷ
-    $query = "SELECT order_id, user_id, total_price, order_status 
-              FROM orders 
-              WHERE order_status NOT IN ('shipped', 'canceled') 
-              ORDER BY order_id DESC";
-    $result = $conn->query($query);
+    // Lấy đơn hàng đang chờ xử lý (pending)
+    $query_pending = "SELECT order_id, user_id, total_price, order_status 
+                      FROM orders 
+                      WHERE order_status = 'pending' 
+                      ORDER BY order_id DESC";
+    $result_pending = $conn->query($query_pending);
     ?>
 
-    <?php if ($result && $result->num_rows > 0): ?>
+    <?php if ($result_pending && $result_pending->num_rows > 0): ?>
         <table class="admin-table">
             <thead>
             <tr>
@@ -101,7 +101,7 @@ if (isset($_GET['id']) && isset($_GET['status'])) {
             </tr>
             </thead>
             <tbody>
-            <?php while ($row = $result->fetch_assoc()): ?>
+            <?php while ($row = $result_pending->fetch_assoc()): ?>
                 <tr>
                     <td><?= htmlspecialchars($row['order_id']) ?></td>
                     <td><?= htmlspecialchars($row['user_id']) ?></td>
@@ -129,6 +129,53 @@ if (isset($_GET['id']) && isset($_GET['status'])) {
         </table>
     <?php else: ?>
         <p class="error-message">❌ Không có đơn hàng nào cần xử lý!</p>
+    <?php endif; ?>
+</section>
+
+<section>
+    <h3>📋 Danh sách Đơn hàng đã xử lý</h3>
+
+    <?php
+    // Lấy đơn hàng đã xử lý (shipped, canceled)
+    $query_processed = "SELECT order_id, user_id, total_price, order_status 
+                        FROM orders 
+                        WHERE order_status IN ('shipped', 'canceled') 
+                        ORDER BY order_id DESC";
+    $result_processed = $conn->query($query_processed);
+    ?>
+
+    <?php if ($result_processed && $result_processed->num_rows > 0): ?>
+        <table class="admin-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>ID Khách hàng</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php while ($row = $result_processed->fetch_assoc()): ?>
+                <tr>
+                    <td><?= htmlspecialchars($row['order_id']) ?></td>
+                    <td><?= htmlspecialchars($row['user_id']) ?></td>
+                    <td><?= number_format($row['total_price'], 0, ',', '.') ?> VND</td>
+                    <td>
+                        <span class="order-status <?= strtolower($row['order_status']) ?>">
+                            <?= htmlspecialchars($row['order_status']) ?>
+                        </span>
+                    </td>
+                    <td>
+                        <!-- Chỉ hiển thị thông tin mà không cho phép thay đổi trạng thái nữa -->
+                        <span class="text-muted">Không thể thay đổi</span>
+                    </td>
+                </tr>
+            <?php endwhile; ?>
+            </tbody>
+        </table>
+    <?php else: ?>
+        <p class="error-message">❌ Không có đơn hàng nào đã xử lý!</p>
     <?php endif; ?>
 </section>
 

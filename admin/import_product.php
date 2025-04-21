@@ -16,25 +16,34 @@ if ($result->num_rows === 0) {
 }
 $product = $result->fetch_assoc();
 
+// Lấy thông tin nhà cung cấp hiện tại
+$stmt_supplier = $conn->prepare("SELECT supplier FROM inventory WHERE product_id = ? LIMIT 1");
+$stmt_supplier->bind_param("i", $product_id);  // Gắn product_id vào truy vấn
+$stmt_supplier->execute();
+$result_supplier = $stmt_supplier->get_result();
+
+if ($result_supplier->num_rows === 0) {
+    die("❌ Không tìm thấy nhà cung cấp cho sản phẩm này.");
+}
+$supplier = $result_supplier->fetch_assoc();
+
 // Xử lý khi gửi form
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $quantity = (int)$_POST['quantity'];
     $purchase_price = (float)$_POST['purchase_price'];
-    $supplier = trim($_POST['supplier']);
-    $unit_type = $_POST['unit_type'];
+    $invoice_code = trim($_POST['invoice_code']);
+    $import_date = $_POST['import_date']; // Ngày nhập kho
 
-    if ($quantity > 0 && $purchase_price > 0 && $supplier !== '') {
-        // Cập nhật bảng inventory
-        $stmt = $conn->prepare("INSERT INTO inventory (product_id, quantity, purchase_price, supplier) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("iids", $product_id, $quantity, $purchase_price, $supplier);
+    if ($quantity > 0 && $purchase_price > 0 && $invoice_code !== '' && $import_date !== '') {
+        // Lưu thông tin nhà cung cấp và các dữ liệu vào bảng inventory
+        $stmt = $conn->prepare("INSERT INTO inventory (product_id, quantity, purchase_price, import_date, invoice_code, supplier) 
+            VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("iidsss", $product_id, $quantity, $purchase_price, $import_date, $invoice_code, $supplier['supplier']);
         $stmt->execute();
 
-        // Cập nhật lại stock_quantity, purchase_price và unit trong bảng products
-        $update = $conn->prepare("UPDATE products SET 
-            stock_quantity = stock_quantity + ?,  
-            unit = ?
-            WHERE product_id = ?");
-        $update->bind_param("idi", $quantity, $unit_type, $product_id);
+        // Cập nhật lại stock_quantity trong bảng products (không thay đổi purchase_price)
+        $update = $conn->prepare("UPDATE products SET stock_quantity = stock_quantity + ? WHERE product_id = ?");
+        $update->bind_param("ii", $quantity, $product_id);
         $update->execute();
 
         header("Location: manage_inventory.php?success=1");
@@ -70,14 +79,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <label for="purchase_price">Giá nhập (VND):</label>
     <input type="number" step="0.01" name="purchase_price" id="purchase_price" required>
 
-    <label for="unit_type">Cách bán:</label>
-    <select name="unit_type" id="unit_type" required>
-        <option value="kg">Theo kg</option>
-        <option value="trái">Theo trái</option>
-    </select>
+    <label for="import_date">Ngày nhập kho:</label>
+    <input type="date" name="import_date" id="import_date" required>
 
-    <label for="supplier">Nhà cung cấp:</label>
-    <input type="text" name="supplier" id="supplier" required>
+    <label for="invoice_code">Số hóa đơn:</label>
+    <input type="text" name="invoice_code" id="invoice_code" required>
 
     <button type="submit" class="btn btn-success">✔ Nhập kho</button>
 </form>
