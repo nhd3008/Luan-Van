@@ -36,9 +36,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($quantity > 0 && $purchase_price > 0 && $invoice_code !== '' && $import_date !== '') {
         // Lưu thông tin nhà cung cấp và các dữ liệu vào bảng inventory
-        $stmt = $conn->prepare("INSERT INTO inventory (product_id, quantity, purchase_price, import_date, invoice_code, supplier) 
-            VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("iidsss", $product_id, $quantity, $purchase_price, $import_date, $invoice_code, $supplier['supplier']);
+        $stmt = $conn->prepare("INSERT INTO inventory (product_id, quantity, purchase_price, import_date, invoice_code, supplier, imported_by) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("iidssss", $product_id, $quantity, $purchase_price, $import_date, $invoice_code, $supplier['supplier'], $_SESSION['email']);
         $stmt->execute();
 
         // Cập nhật lại stock_quantity trong bảng products (không thay đổi purchase_price)

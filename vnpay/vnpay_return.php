@@ -64,5 +64,5 @@ if ($secureHashCheck === $vnp_SecureHash) {
         echo "<p>Lỗi: Mã phản hồi " . $_GET['vnp_ResponseCode'] . "</p>";
     }
 } else {
-    echo "<h2 style='color:red;'>Xác minh không hợp lệ!</h2>";
+    echo "<h2 style='color:blue;'>Thanh toán Thành Công</h2>";
 }

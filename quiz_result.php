@@ -78,7 +78,7 @@ $fruit_names = array_unique($fruit_names);
 $matched_products = [];
 if (!empty($fruit_names)) {
     $conditions = array_map(fn($f) => "name LIKE ?", $fruit_names);
-    $sql = "SELECT * FROM products WHERE " . implode(" OR ", $conditions);
+    $sql = "SELECT * FROM products p WHERE (" . implode(" OR ", $conditions) . ") AND p.status = 'selling'";
     $stmt = $conn->prepare($sql);
     if ($stmt) {
         $types = str_repeat("s", count($fruit_names));
@@ -182,11 +182,6 @@ if (!empty($fruit_names)) {
                 <?= number_format($product['selling_price']) ?> VNĐ
               </p>
 
-              <?php if ($product['discount'] > 0): ?>
-                <p class="card-text text-muted mb-2">
-                  <del><?= number_format($product['selling_price'] + $product['discount']) ?> VNĐ</del>
-                </p>
-              <?php endif; ?>
 
               <?php if ($product['stock_quantity'] > 0): ?>
                 <p class="text-success fw-semibold mb-2">

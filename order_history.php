@@ -60,6 +60,9 @@ $orders = $result->fetch_all(MYSQLI_ASSOC);
             </tbody>
         </table>
     <?php endif; ?>
+    <div class="text-center mt-3">
+        <a href="index.php" class="btn btn-success">Tiếp tục mua sắm</a>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

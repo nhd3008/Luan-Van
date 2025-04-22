@@ -60,7 +60,7 @@ require_once __DIR__ . '/../database/db_connect.php';
     }
 
     // Cập nhật câu truy vấn SQL để loại bỏ trùng lặp
-    $query = "SELECT DISTINCT p.product_id, p.name, p.stock_quantity, p.status, i.supplier 
+    $query = "SELECT DISTINCT p.product_id, p.name, p.stock_quantity, p.status, i.supplier, i.purchase_price 
               FROM products p 
               LEFT JOIN inventory i ON p.product_id = i.product_id
               $condition
@@ -87,6 +87,7 @@ require_once __DIR__ . '/../database/db_connect.php';
                     <th>Tên sản phẩm</th>
                     <th>Nhà cung cấp</th>
                     <th>SL tồn kho</th>
+                    <th>Giá nhập kho</th>
                     <th>Trạng thái</th>
                     <th>Hành động</th>
                 </tr>
@@ -97,7 +98,8 @@ require_once __DIR__ . '/../database/db_connect.php';
                     <td><?= htmlspecialchars($row['product_id']) ?></td>
                     <td><?= htmlspecialchars($row['name']) ?></td>
                     <td><?= htmlspecialchars($row['supplier']) ?></td>
-                    <td><?= (int)$row['stock_quantity'] ?></td>
+                    <td><?= (float)$row['stock_quantity'] ?></td>
+                    <td><?= number_format($row['purchase_price'], 0, ',', '.') ?> VND</td>
                     <td>
                         <?php if ($row['status'] === 'selling'): ?>
                             <span class="badge-success">✔ Đã bán</span>

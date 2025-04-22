@@ -3,7 +3,6 @@ session_start();
 require_once __DIR__ . '/../includes/middleware_admin.php';
 checkPermissions('admin');
 require_once __DIR__ . '/../database/db_connect.php';
-
 // Lấy dữ liệu thống kê tổng quát
 $total_products = $conn->query("SELECT COUNT(*) AS total FROM products")->fetch_assoc()['total'];
 $total_users = $conn->query("SELECT COUNT(*) AS total FROM users")->fetch_assoc()['total'];
@@ -219,6 +218,13 @@ while ($row = $revenue_result->fetch_assoc()) {
         </div>
     </div>
 </div>
+<!-- Thêm nút xuất file doanh thu -->
+<div class="row mb-4">
+    <div class="col-md-12 text-center">
+        <a href="export_revenue.php" class="btn btn-success">📊 Xuất dữ liệu doanh thu ra Excel</a>
+    </div>
+</div>
+
 
 <!-- Top sản phẩm bán chạy -->
 <div class="card mt-4 shadow">

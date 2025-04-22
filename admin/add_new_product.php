@@ -31,21 +31,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $unit = $_POST['unit'];
     $supplier = $_POST['supplier'];
     $invoice_code = $_POST['invoice_code'];  // Lấy mã hoá đơn từ form
+    $import_date = $_POST['import_date'];  // Lấy ngày nhập kho từ form
+
 
     if ($name !== '' && $quantity > 0 && $purchase_price > 0 && $supplier !== '' && $invoice_code !== '') {
         $product_id = generateUniqueProductID($conn);
 
         // Thêm sản phẩm vào bảng products
         $stmt = $conn->prepare("INSERT INTO products 
-            (product_id, name, stock_quantity, unit, category, discount, visibility, status)
-            VALUES (?, ?, ?, ?, 'Chung', 0.00, 'public', 'not_selling')");
+            (product_id, name, stock_quantity, unit, category, visibility, status)
+            VALUES (?, ?, ?, ?, 'Chung', 'public', 'not_selling')");
         $stmt->bind_param("isis", $product_id, $name, $quantity, $unit);
         $stmt->execute();
 
         // Thêm thông tin nhập kho vào bảng inventory, bao gồm mã hoá đơn
-        $inv = $conn->prepare("INSERT INTO inventory (product_id, quantity, purchase_price, supplier, invoice_code) 
-                                           VALUES (?, ?, ?, ?, ?)");
-        $inv->bind_param("iidsi", $product_id, $quantity, $purchase_price, $supplier, $invoice_code);
+        $inv = $conn->prepare("INSERT INTO inventory (product_id, quantity, purchase_price, supplier, unit_type, invoice_code, import_date, imported_by) 
+                                           VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $inv->bind_param("iidssiss", $product_id, $quantity, $purchase_price, $supplier, $unit, $invoice_code, $import_date, $_SESSION['email']);
         $inv->execute();
 
         header("Location: manage_inventory.php?success=1");
@@ -182,6 +184,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </select>
         <label for="invoice_code">Mã hoá đơn:</label>
         <input type="text" name="invoice_code" id="invoice_code" class="form-control" required>
+        <label for="import_date">Ngày nhập kho:</label>
+        <input type="date" name="import_date" id="import_date" class="form-control" required>
+
  
         <button type="submit">✔ Thêm sản phẩm & Nhập kho</button>
     </form>

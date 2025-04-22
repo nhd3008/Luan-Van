@@ -103,11 +103,31 @@ $stmt->bind_param("i", $user_id);
 $stmt->execute();
 
 // Cập nhật tồn kho
+// Cập nhật tồn kho
 foreach ($cart_items as $item) {
-$stmt = $conn->prepare("UPDATE products SET stock_quantity = stock_quantity - ? WHERE product_id = ?");
-$stmt->bind_param("ii", $item['quantity'], $item['product_id']);
-$stmt->execute();
+    // Lấy đơn vị từ bảng `products` theo `product_id`
+    $stmt_unit = $conn->prepare("SELECT unit FROM products WHERE product_id = ?");
+    $stmt_unit->bind_param("i", $item['product_id']);
+    $stmt_unit->execute();
+    $result_unit = $stmt_unit->get_result();
+    $unit = $result_unit->fetch_assoc()['unit'];
+
+    // Kiểm tra đơn vị và cập nhật tồn kho
+    if ($unit == 'trái') {
+        // Trừ đúng số lượng khi unit là trái
+        $stmt = $conn->prepare("UPDATE products SET stock_quantity = stock_quantity - ? WHERE product_id = ?");
+        $stmt->bind_param("ii", $item['quantity'], $item['product_id']);
+    } elseif ($unit == 'kg') {
+        // Trừ một nửa số lượng khi unit là kg
+        $half_quantity = $item['quantity'] / 2;
+        $stmt = $conn->prepare("UPDATE products SET stock_quantity = stock_quantity - ? WHERE product_id = ?");
+        $stmt->bind_param("di", $half_quantity, $item['product_id']);
+    }
+    
+    // Thực thi câu lệnh cập nhật tồn kho
+    $stmt->execute();
 }
+
 
 unset($_SESSION['cart']);
 

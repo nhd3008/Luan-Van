@@ -5,6 +5,7 @@
         <a href="manage_inventory.php">📦 Kho</a>
         <a href="manage_orders.php">🧾 Đơn hàng</a>
         <a href="manage_users.php">👤 Người dùng</a>
+        <a href="manage_supplier.php">🏢 Nhà cung cấp</a> <!-- Đổi icon ở đây -->
         <a href="manage_blogs.php">📝 Blog</a>
         <a href="../auth/logout.php">🚪 Đăng xuất</a>
     </nav>

@@ -19,7 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Chuẩn bị và thực hiện truy vấn để lấy thông tin người dùng
-    $stmt = $conn->prepare("SELECT user_id, password, role FROM users WHERE email = ?");
+    $stmt = $conn->prepare("SELECT user_id, email, password, role FROM users WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -32,6 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             session_regenerate_id(true);
             $_SESSION['user_id'] = $user['user_id'];
             $_SESSION['role'] = $user['role']; // Lưu vai trò người dùng vào session
+            $_SESSION['email'] = $user['email'];
 
             // Chuyển hướng theo quyền
             switch ($user['role']) {

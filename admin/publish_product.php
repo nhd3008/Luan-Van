@@ -25,7 +25,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $selling_price = floatval($_POST['selling_price']);
     $description = trim($_POST['description']);
     $category = trim($_POST['category']);
-    $discount = floatval($_POST['discount']);
     $image_url = $product['image_url'];
 
     // Xử lý upload ảnh nếu có
@@ -56,11 +55,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Cập nhật sản phẩm
-    $stmt = $conn->prepare("UPDATE products SET selling_price = ?, description = ?, category = ?, discount = ?, image_url = ?, status = 'selling', visibility = 'public' WHERE product_id = ?");
-    $stmt->bind_param("dssdsi", $selling_price, $description, $category, $discount, $image_url, $product_id);
+    $stmt = $conn->prepare("UPDATE products SET selling_price = ?, description = ?, category = ?, image_url = ?, status = 'selling', visibility = 'public' WHERE product_id = ?");
+    $stmt->bind_param("dsssi", $selling_price, $description, $category, $image_url, $product_id);
 
     if ($stmt->execute()) {
-        echo "<script>alert('Xuất bản thành công!'); window.location.href='list_product.php';</script>";
+        echo "<script>alert('Xuất bản thành công!'); window.location.href='manage_products.php';</script>";
     } else {
         echo "Lỗi: " . $stmt->error;
     }
@@ -87,9 +86,6 @@ $conn->close();
 
         <label for="selling_price">Giá bán:</label>
         <input type="number" step="0.01" name="selling_price" class="form-control" required>
-
-        <label for="discount">Khuyến mãi (%):</label>
-        <input type="number" step="0.01" name="discount" class="form-control" value="0">
 
         <label for="description">Mô tả:</label>
         <textarea name="description" class="form-control" required></textarea>

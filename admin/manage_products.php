@@ -48,7 +48,7 @@ require_once __DIR__ . '/../database/db_connect.php';
                     <td><?= htmlspecialchars($row['name']) ?></td>
                     <td><?= number_format($row['selling_price'], 0, ',', '.') ?> VND</td>
                     <td><?= $unit_labels[$row['unit']] ?? 'Không xác định' ?></td>
-                    <td><?= (int)$row['stock_quantity'] ?></td>
+                    <td><?= (float)$row['stock_quantity'] ?></td>
                     <td>
                         <a class="btn btn-primary" href="../api/edit_product.php?id=<?= $row['product_id'] ?>">✏️ Sửa</a>
                         <a class="btn btn-danger" href="../api/delete_product.php?id=<?= $row['product_id'] ?>" onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này?');">🗑️ Xóa</a>
