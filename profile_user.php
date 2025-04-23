@@ -22,31 +22,11 @@ if (!$user) {
     die("Không tìm thấy thông tin người dùng.");
 }
 
-// Cập nhật thông tin người dùng nếu form đã được gửi
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $username = $_POST['username'] ?? '';  // Dùng ?? để tránh lỗi nếu không có dữ liệu
-    $email = $_POST['email'] ?? '';        
-    $full_name = $_POST['full_name'] ?? ''; 
-    $phone_number = $_POST['phone_number'] ?? ''; 
-    $address = $_POST['address'] ?? '';    
-    $password = $_POST['password'] ?? '';  // Mật khẩu mới
-
-    // Kiểm tra nếu mật khẩu mới được nhập, thì mã hóa và cập nhật
-    if (!empty($password)) {
-        $hashed_password = password_hash($password, PASSWORD_BCRYPT);
-        $stmt = $conn->prepare("UPDATE users SET username = ?, email = ?, full_name = ?, phone_number = ?, address = ?, password = ? WHERE user_id = ?");
-        $stmt->bind_param("ssssssi", $username, $email, $full_name, $phone_number, $address, $hashed_password, $user_id);
-    } else {
-        $stmt = $conn->prepare("UPDATE users SET username = ?, email = ?, full_name = ?, phone_number = ?, address = ? WHERE user_id = ?");
-        $stmt->bind_param("sssssi", $username, $email, $full_name, $phone_number, $address, $user_id);
-    }
-
-    if ($stmt->execute()) {
-        $message = "Cập nhật thông tin thành công!";
-    } else {
-        $message = "Có lỗi xảy ra. Vui lòng thử lại!";
-    }
-}
+// Kiểm tra sự tồn tại của các chỉ mục trước khi hiển thị
+$email = isset($user['email']) ? htmlspecialchars($user['email']) : 'Không có dữ liệu';
+$full_name = isset($user['full_name']) ? htmlspecialchars($user['full_name']) : 'Không có dữ liệu';
+$phone_number = isset($user['phone_number']) ? htmlspecialchars($user['phone_number']) : 'Không có dữ liệu';
+$address = isset($user['address']) ? htmlspecialchars($user['address']) : 'Không có dữ liệu';
 ?>
 
 <!DOCTYPE html>
@@ -64,44 +44,43 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <div class="container my-5">
         <h1 class="text-center mb-4 text-success fw-bold">👤 Hồ Sơ Người Dùng</h1>
 
+        <!-- Hiển thị thông báo nếu có -->
         <?php if (isset($message)) echo "<p class='alert alert-success'>$message</p>"; ?>
 
-        <form method="POST" class="form-container">
-            <div class="mb-3">
-                <label for="username" class="form-label">Tên người dùng:</label>
-                <input type="text" name="username" id="username" class="form-control" value="<?php echo isset($user['username']) ? htmlspecialchars($user['username']) : ''; ?>" required>
-            </div>
+        <div class="mb-3">
+            <label for="username" class="form-label">Tên người dùng:</label>
+            <input type="text" class="form-control" value="<?php echo htmlspecialchars($user['username']); ?>" disabled>
+        </div>
 
-            <div class="mb-3">
-                <label for="email" class="form-label">Email:</label>
-                <input type="email" name="email" id="email" class="form-control" value="<?php echo isset($user['email']) ? htmlspecialchars($user['email']) : ''; ?>" required>
-            </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email:</label>
+            <input type="email" class="form-control" value="<?php echo $email; ?>" disabled>
+        </div>
 
-            <div class="mb-3">
-                <label for="full_name" class="form-label">Họ tên:</label>
-                <input type="text" name="full_name" id="full_name" class="form-control" value="<?php echo isset($user['full_name']) ? htmlspecialchars($user['full_name']) : ''; ?>" required>
-            </div>
+        <div class="mb-3">
+            <label for="full_name" class="form-label">Họ tên:</label>
+            <input type="text" class="form-control" value="<?php echo $full_name; ?>" disabled>
+        </div>
 
-            <div class="mb-3">
-                <label for="phone_number" class="form-label">Số điện thoại:</label>
-                <input type="text" name="phone_number" id="phone_number" class="form-control" value="<?php echo isset($user['phone_number']) ? htmlspecialchars($user['phone_number']) : ''; ?>" required>
-            </div>
+        <div class="mb-3">
+            <label for="phone_number" class="form-label">Số điện thoại:</label>
+            <input type="text" class="form-control" value="<?php echo $phone_number; ?>" disabled>
+        </div>
 
-            <div class="mb-3">
-                <label for="address" class="form-label">Địa chỉ:</label>
-                <input type="text" name="address" id="address" class="form-control" value="<?php echo isset($user['address']) ? htmlspecialchars($user['address']) : ''; ?>" required>
-            </div>
+        <div class="mb-3">
+            <label for="address" class="form-label">Địa chỉ:</label>
+            <input type="text" class="form-control" value="<?php echo $address; ?>" disabled>
+        </div>
 
-            <div class="mb-3">
-                <label for="password" class="form-label">Mật khẩu mới (nếu thay đổi):</label>
-                <input type="password" name="password" id="password" class="form-control">
-            </div>
+        <!-- Chỉ hiển thị thông tin, không cho phép nhập mật khẩu mới -->
+        <div class="mb-3">
+            <label for="password" class="form-label">Mật khẩu:</label>
+            <input type="password" class="form-control" value="******" disabled>
+        </div>
 
-            <button type="submit" class="btn btn-success w-100">Cập nhật thông tin</button>
-        </form>
-
+        <!-- Nút chuyển tới trang cập nhật thông tin -->
         <div class="text-center mt-4">
-            <a href="change_password.php" class="btn btn-link">Thay đổi mật khẩu</a>
+            <a href="update_profile.php" class="btn btn-primary">Cập nhật thông tin</a>
         </div>
     </div>
 

@@ -20,11 +20,6 @@ foreach ($inputData as $key => $value) {
 }
 $hashData = rtrim($hashData, '&');
 
-// Debug: In ra các giá trị để kiểm tra
-echo "<pre>";
-echo "Chuỗi dữ liệu tạo hash: \n";
-print_r($inputData);  // In ra các tham số và giá trị trong $_GET sau khi đã sắp xếp
-echo "</pre>";
 
 // Tạo SecureHash từ chuỗi đã tạo
 $secureHashCheck = hash_hmac('sha512', $hashData, $vnp_HashSecret);
@@ -64,5 +59,7 @@ if ($secureHashCheck === $vnp_SecureHash) {
         echo "<p>Lỗi: Mã phản hồi " . $_GET['vnp_ResponseCode'] . "</p>";
     }
 } else {
-    echo "<h2 style='color:blue;'>Thanh toán Thành Công</h2>";
+    echo "<h2 style='color:red;'>Thanh toán thành công</h2>";
+    header("Location: /fruit_store/order_details.php"); // Thay đổi 'order_details.php' thành đường dẫn trang chi tiết đơn hàng của bạn
+exit();
 }

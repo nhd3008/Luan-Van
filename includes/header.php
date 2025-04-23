@@ -68,7 +68,7 @@ if ($is_logged_in) {
                     </a>
                     <?php if ($is_logged_in): ?>
                         <a href="order_history.php" class="btn btn-warning me-2">📦 Đơn hàng của bạn</a>
-                        <span class="me-2 fw-bold">👤 <?php echo htmlspecialchars($user_name); ?></span>
+                        <a href ="profile_user.php" class="me-2 fw-bold">👤 <?php echo htmlspecialchars($user_name); ?></span>
                         <a href="auth/logout.php" class="btn btn-danger">Đăng Xuất</a>
                     <?php else: ?>
                         <a href="auth/login.php" class="btn btn-success">Đăng Nhập</a>
